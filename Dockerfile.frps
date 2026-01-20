@@ -15,24 +15,11 @@ RUN apk add --no-cache wget ca-certificates tzdata gettext && \
     apk del wget
 
 # 创建配置模板
-RUN printf '[common]\n\
-bind_port = ${BIND_PORT}\n\
-dashboard_port = ${DASHBOARD_PORT}\n\
-dashboard_user = ${DASHBOARD_USER}\n\
-dashboard_pwd = ${DASHBOARD_PWD}\n\
-token = ${TOKEN}\n\
-log_file = /dev/stdout\n\
-log_level = info\n\
-vhost_http_port = 80\n\
-vhost_https_port = 443\n\
-max_pool_count = 5\n\
-heartbeat_timeout = 90\n\
-tcp_mux = true\n' > /etc/frp/frps.ini.tpl
+RUN mkdir -p /etc/frp && \
+    printf '[common]\nbind_port = ${BIND_PORT}\ndashboard_port = ${DASHBOARD_PORT}\ndashboard_user = ${DASHBOARD_USER}\ndashboard_pwd = ${DASHBOARD_PWD}\ntoken = ${TOKEN}\nlog_file = /dev/stdout\nlog_level = info\nvhost_http_port = 80\nvhost_https_port = 443\nmax_pool_count = 5\nheartbeat_timeout = 90\ntcp_mux = true\n' > /etc/frp/frps.ini.tpl
 
-# 启动脚本
-RUN printf '#!/bin/sh\n\
-envsubst < /etc/frp/frps.ini.tpl > /etc/frp/frps.ini\n\
-exec frps -c /etc/frp/frps.ini\n' > /start.sh && \
+# 创建启动脚本
+RUN printf '#!/bin/sh\nenvsubst < /etc/frp/frps.ini.tpl > /etc/frp/frps.ini\nexec frps -c /etc/frp/frps.ini\n' > /start.sh && \
     chmod +x /start.sh
 
 EXPOSE 7000 7500 80 443
